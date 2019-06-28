@@ -6,25 +6,25 @@ import (
 )
 
 func Get(url string, headers map[string]string) (*http.Response, error) {
-	return NewClient().SetUrl(url).SetHeaders(headers).Get()
+	return NewClient().Url(url).Headers(headers).Get()
 }
 
 func Post(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	return NewClient().SetUrl(url).SetHeaders(headers).SetBody(body).Post()
+	return NewClient().Url(url).Headers(headers).Body(body).Post()
 }
 
 func Put(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	return NewClient().SetUrl(url).SetHeaders(headers).SetBody(body).Put()
+	return NewClient().Url(url).Headers(headers).Body(body).Put()
 }
 
 func Patch(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	return NewClient().SetUrl(url).SetHeaders(headers).SetBody(body).Patch()
+	return NewClient().Url(url).Headers(headers).Body(body).Patch()
 }
 
 func Delete(url string, headers map[string]string) (*http.Response, error) {
-	return NewClient().SetUrl(url).SetHeaders(headers).Delete()
+	return NewClient().Url(url).Headers(headers).Delete()
 }
 
 func Options(url string, headers map[string]string) (*http.Response, error) {
-	return NewClient().SetUrl(url).SetHeaders(headers).Options()
+	return NewClient().Url(url).Headers(headers).Options()
 }

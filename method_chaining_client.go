@@ -24,34 +24,34 @@ func NewClient() *GHttpClient {
 	}
 }
 
-func (g *GHttpClient) SetUrl(url string) *GHttpClient {
+func (g *GHttpClient) Url(url string) *GHttpClient {
 	g.url = url
 	return g
 }
 
-func (g *GHttpClient) SetHeader(headerKey, headerValue string) *GHttpClient {
+func (g *GHttpClient) Header(headerKey, headerValue string) *GHttpClient {
 	g.header.Set(headerKey, headerValue)
 	return g
 }
 
-func (g *GHttpClient) SetHeaders(headers map[string]string) *GHttpClient {
+func (g *GHttpClient) Headers(headers map[string]string) *GHttpClient {
 	for headerKey, headerValue := range headers {
 		g.header.Set(headerKey, headerValue)
 	}
 	return g
 }
 
-func (g *GHttpClient) SetBody(body io.Reader) *GHttpClient {
+func (g *GHttpClient) Body(body io.Reader) *GHttpClient {
 	g.body = body
 	return g
 }
 
-func (g *GHttpClient) SetSslSkipVerify(skip bool) *GHttpClient {
+func (g *GHttpClient) SslSkipVerify(skip bool) *GHttpClient {
 	g.sslSkipVerify = skip
 	return g
 }
 
-func (g *GHttpClient) SetTimeout(timeout time.Duration) *GHttpClient {
+func (g *GHttpClient) Timeout(timeout time.Duration) *GHttpClient {
 	g.timeout = timeout
 	return g
 }
