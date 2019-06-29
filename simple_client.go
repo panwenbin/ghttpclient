@@ -35,6 +35,12 @@ func Put(url string, body io.Reader, headers map[string]string) (*http.Response,
 	return NewClient().Url(url).Headers(headers).Body(body).Put()
 }
 
+func PutJson(url string, jsonBytes []byte, headers map[string]string) (*http.Response, error) {
+	return NewClient().Url(url). Headers(headers). Body(bytes.NewReader(jsonBytes)).
+		Header("Content-Type", "application/json").
+		Put()
+}
+
 func Patch(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
 	return NewClient().Url(url).Headers(headers).Body(body).Patch()
 }

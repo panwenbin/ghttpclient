@@ -89,6 +89,27 @@ func TestPut(t *testing.T) {
 	}
 }
 
+func TestPutJson(t *testing.T) {
+	type TestJson struct {
+		Msg string `json:"msg"`
+	}
+	testJson := TestJson{
+		Msg: "ghttpclient",
+	}
+	jsonBytes, _ := json.Marshal(testJson)
+
+	response, err := ghttpclient.PutJson("http://cp.fei.lv/ghttpclient", jsonBytes, nil)
+	if err != nil {
+		t.Error("network error")
+	}
+
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if bytes.Compare(jsonBytes, body) != 0 {
+		t.Errorf("expect 'ghttpclient, got %s", body)
+	}
+}
+
 func TestPatch(t *testing.T) {
 	response, err := ghttpclient.Patch("http://cp.fei.lv/patch", strings.NewReader("ghttpclient"), nil)
 	if err != nil {
