@@ -1,3 +1,6 @@
+// Copyright 2019 潘文斌. All rights reserved.
+// license that can be found in the LICENSE file.
+
 package ghttpclient
 
 import (
