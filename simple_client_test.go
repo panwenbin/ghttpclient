@@ -87,3 +87,19 @@ func TestOptions(t *testing.T) {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
 }
+
+func TestGetWithHeader(t *testing.T) {
+	response, err := ghttpclient.Get("http://ua.fei.lv/", map[string]string {
+		"User-Agent": "ghttpclient",
+	})
+
+	if err != nil {
+		t.Error("network error")
+	}
+
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if strings.Compare("ghttpclient", string(body)) != 0 {
+		t.Errorf("expect 'ghttpclient, got %s", body)
+	}
+}
