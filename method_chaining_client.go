@@ -24,6 +24,7 @@ type GHttpClient struct {
 
 func NewClient() *GHttpClient {
 	return &GHttpClient{
+		header: make(http.Header),
 	}
 }
 
