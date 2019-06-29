@@ -4,8 +4,11 @@
 package ghttpclient_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/panwenbin/ghttpclient"
 	"io/ioutil"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -32,6 +35,43 @@ func TestPost(t *testing.T) {
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
+		t.Errorf("expect 'ghttpclient, got %s", body)
+	}
+}
+
+func TestPostJson(t *testing.T) {
+	type TestJson struct {
+		Msg string `json:"msg"`
+	}
+	testJson := TestJson{
+		Msg: "ghttpclient",
+	}
+	jsonBytes, _ := json.Marshal(testJson)
+
+	response, err := ghttpclient.PostJson("http://cp.fei.lv/", jsonBytes, nil)
+	if err != nil {
+		t.Error("network error")
+	}
+
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if bytes.Compare(jsonBytes, body) != 0 {
+		t.Errorf("expect 'ghttpclient, got %s", body)
+	}
+}
+
+func TestPostForm(t *testing.T) {
+	data := url.Values{}
+	data.Add("msg", "ghttpclient")
+
+	response, err := ghttpclient.PostForm("http://cp.fei.lv/", data, nil)
+	if err != nil {
+		t.Error("network error")
+	}
+
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if strings.Compare(data.Encode(), string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
 }
