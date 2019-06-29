@@ -1,6 +1,9 @@
 ## GHttpClient
 A method chaining HTTP Client for Golang with simple methods
 
+## Simple Methods
+Get, Post, PostJson, PostForm, Put, PutJson, Patch, Delete, Options
+
 ## Examples
 ```go
 package main
