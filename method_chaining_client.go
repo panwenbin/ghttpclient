@@ -11,33 +11,38 @@ import (
 	"time"
 )
 
-// Method chaining HTTP Client
+// GHttpClient is a Method chaining HTTP Client which is based on net/http.Client
+// NewClient => set attributes of a request => do the request with an action(Get, Post...)
 type GHttpClient struct {
 	request       *http.Request
 	client        *http.Client
 	url           string
 	sslSkipVerify bool
 	header        http.Header
-	body 		  io.Reader
+	body          io.Reader
 	timeout       time.Duration
 }
 
+// NewClient Returns a new GHttpClient
 func NewClient() *GHttpClient {
 	return &GHttpClient{
 		header: make(http.Header),
 	}
 }
 
+// Url sets the url to request to
 func (g *GHttpClient) Url(url string) *GHttpClient {
 	g.url = url
 	return g
 }
 
+// Header sets a header
 func (g *GHttpClient) Header(headerKey, headerValue string) *GHttpClient {
 	g.header.Set(headerKey, headerValue)
 	return g
 }
 
+// Headers sets a group of headers
 func (g *GHttpClient) Headers(headers map[string]string) *GHttpClient {
 	for headerKey, headerValue := range headers {
 		g.header.Set(headerKey, headerValue)
@@ -45,21 +50,25 @@ func (g *GHttpClient) Headers(headers map[string]string) *GHttpClient {
 	return g
 }
 
+// Body sets the body of the request
 func (g *GHttpClient) Body(body io.Reader) *GHttpClient {
 	g.body = body
 	return g
 }
 
+// SslSkipVerify sets whether or not skipping ssl verify
 func (g *GHttpClient) SslSkipVerify(skip bool) *GHttpClient {
 	g.sslSkipVerify = skip
 	return g
 }
 
+// Timeout sets a timeout to the http client
 func (g *GHttpClient) Timeout(timeout time.Duration) *GHttpClient {
 	g.timeout = timeout
 	return g
 }
 
+// prepare checks whether attributes are set, and build a http client
 func (g *GHttpClient) prepare(method string) error {
 	if g.url == "" {
 		return errors.New("URL must be set before sending a request")
@@ -73,8 +82,7 @@ func (g *GHttpClient) prepare(method string) error {
 
 	g.request = request
 
-	g.client = &http.Client{
-	}
+	g.client = &http.Client{}
 
 	if g.timeout > 0 {
 		g.client.Timeout = g.timeout
@@ -89,6 +97,7 @@ func (g *GHttpClient) prepare(method string) error {
 	return nil
 }
 
+// send do send the request
 func (g *GHttpClient) send() (*http.Response, error) {
 	response, err := g.client.Do(g.request)
 	if err != nil {
@@ -98,6 +107,7 @@ func (g *GHttpClient) send() (*http.Response, error) {
 	return response, nil
 }
 
+// Head sends the Request with HEAD method
 func (g *GHttpClient) Head() (*http.Response, error) {
 	err := g.prepare("HEAD")
 	if err != nil {
@@ -107,6 +117,7 @@ func (g *GHttpClient) Head() (*http.Response, error) {
 	return g.send()
 }
 
+// Get sends the Request with GET method
 func (g *GHttpClient) Get() (*http.Response, error) {
 	err := g.prepare("GET")
 	if err != nil {
@@ -116,6 +127,7 @@ func (g *GHttpClient) Get() (*http.Response, error) {
 	return g.send()
 }
 
+// Post sends the Request with POST method
 func (g *GHttpClient) Post() (*http.Response, error) {
 	err := g.prepare("POST")
 	if err != nil {
@@ -125,6 +137,7 @@ func (g *GHttpClient) Post() (*http.Response, error) {
 	return g.send()
 }
 
+// Put sends the Request with PUT method
 func (g *GHttpClient) Put() (*http.Response, error) {
 	err := g.prepare("PUT")
 	if err != nil {
@@ -134,6 +147,7 @@ func (g *GHttpClient) Put() (*http.Response, error) {
 	return g.send()
 }
 
+// Patch sends the Request with PATCH method
 func (g *GHttpClient) Patch() (*http.Response, error) {
 	err := g.prepare("PATCH")
 	if err != nil {
@@ -143,6 +157,7 @@ func (g *GHttpClient) Patch() (*http.Response, error) {
 	return g.send()
 }
 
+// Delete sends the Request with DELETE method
 func (g *GHttpClient) Delete() (*http.Response, error) {
 	err := g.prepare("DELETE")
 	if err != nil {
@@ -151,6 +166,7 @@ func (g *GHttpClient) Delete() (*http.Response, error) {
 	return g.send()
 }
 
+// Options sends the Request with OPTIONS method
 func (g *GHttpClient) Options() (*http.Response, error) {
 	err := g.prepare("OPTIONS")
 	if err != nil {
