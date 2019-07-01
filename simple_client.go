@@ -5,7 +5,12 @@ package ghttpclient
 
 import (
 	"bytes"
+	"compress/gzip"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -60,4 +65,50 @@ func Delete(url string, headers map[string]string) (*http.Response, error) {
 // Send a Request with OPTIONS method
 func Options(url string, headers map[string]string) (*http.Response, error) {
 	return NewClient().Url(url).Headers(headers).Options()
+}
+
+// ReadBodyClose fetches the response Body, then close the Body
+// supports gzip content-type
+func ReadBodyClose(response *http.Response) ([]byte, error) {
+	if response == nil {
+		return nil, errors.New("response  is nil")
+	}
+
+	defer response.Body.Close()
+
+	var body []byte
+	var err error
+
+	if response.Header.Get("Content-Encoding") == "gzip" {
+		gzReader, err := gzip.NewReader(response.Body)
+		if err != nil {
+			return nil, err
+		}
+		body, err = ioutil.ReadAll(gzReader)
+	} else {
+		body, err = ioutil.ReadAll(response.Body)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+// ReadJsonClose fetches the response Body and try to decode as a json, then close the Body
+func ReadJsonClose(response *http.Response, v interface{}) error {
+	contentType := response.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		return errors.New(fmt.Sprintf("content type application/json expected, but %s got", contentType))
+	}
+	body, err := ReadBodyClose(response)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, v)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
