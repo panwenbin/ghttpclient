@@ -96,7 +96,7 @@ func ReadBodyClose(response *http.Response) ([]byte, error) {
 // ReadJsonClose fetches the response Body and try to decode as a json, then close the Body
 func ReadJsonClose(response *http.Response, v interface{}) error {
 	contentType := response.Header.Get("Content-Type")
-	if contentType != header.CONTENT_TYPE_JSON {
+	if strings.Index(contentType, header.CONTENT_TYPE_JSON) == -1 {
 		return errors.New(fmt.Sprintf("content type application/json expected, but %s got", contentType))
 	}
 	body, err := ReadBodyClose(response)
