@@ -6,6 +6,7 @@ package ghttpclient
 import (
 	"crypto/tls"
 	"errors"
+	"github.com/panwenbin/ghttpclient/header"
 	"io"
 	"net/http"
 	"time"
@@ -18,7 +19,7 @@ type GHttpClient struct {
 	client        *http.Client
 	url           string
 	sslSkipVerify bool
-	header        http.Header
+	header        header.GHttpHeader
 	body          io.Reader
 	timeout       time.Duration
 }
@@ -26,7 +27,7 @@ type GHttpClient struct {
 // NewClient Returns a new GHttpClient
 func NewClient() *GHttpClient {
 	return &GHttpClient{
-		header: make(http.Header),
+		header: make(header.GHttpHeader),
 	}
 }
 
@@ -43,10 +44,22 @@ func (g *GHttpClient) Header(headerKey, headerValue string) *GHttpClient {
 }
 
 // Headers sets a group of headers
-func (g *GHttpClient) Headers(headers map[string]string) *GHttpClient {
-	for headerKey, headerValue := range headers {
+func (g *GHttpClient) Headers(httpHeader header.GHttpHeader) *GHttpClient {
+	for headerKey, headerValue := range httpHeader {
 		g.header.Set(headerKey, headerValue)
 	}
+	return g
+}
+
+// ContentType sets the Content-Type header
+func (g *GHttpClient) ContentType(contentType string) *GHttpClient {
+	g.header.ContentType(contentType)
+	return g
+}
+
+// UserAgent sets the User-Agent header
+func (g *GHttpClient) UserAgent(userAgent string) *GHttpClient {
+	g.header.UserAgent(userAgent)
 	return g
 }
 
@@ -78,7 +91,7 @@ func (g *GHttpClient) prepare(method string) error {
 	if err != nil {
 		return err
 	}
-	request.Header = g.header
+	request.Header = g.header.ToHttpHeader()
 
 	g.request = request
 

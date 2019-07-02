@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/panwenbin/ghttpclient/header"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -17,54 +18,51 @@ import (
 )
 
 // Send a Request with GET method
-func Get(url string, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Get()
+func Get(url string, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Get()
 }
 
 // Send a Request with POST method
-func Post(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Body(body).Post()
+func Post(url string, body io.Reader, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Body(body).Post()
 }
 
 // Send a Request as a json with POST Method
-func PostJson(url string, jsonBytes []byte, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Body(bytes.NewReader(jsonBytes)).
-		Header("Content-Type", "application/json").
-		Post()
+func PostJson(url string, jsonBytes []byte, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
+		ContentType(header.CONTENT_TYPE_JSON).Post()
 }
 
 // Send a Request as a form with POST method
-func PostForm(url string, data url.Values, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Body(strings.NewReader(data.Encode())).
-		Header("Content-Type", "application/x-www-form-urlencoded").
-		Post()
+func PostForm(url string, data url.Values, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Body(strings.NewReader(data.Encode())).
+		ContentType(header.CONTENT_TYPE_FORM_URLENCODED).Post()
 }
 
 // Send a Request with PUT method
-func Put(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Body(body).Put()
+func Put(url string, body io.Reader, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Body(body).Put()
 }
 
 // Send a Request as a json with PUT method
-func PutJson(url string, jsonBytes []byte, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Body(bytes.NewReader(jsonBytes)).
-		Header("Content-Type", "application/json").
-		Put()
+func PutJson(url string, jsonBytes []byte, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
+		ContentType(header.CONTENT_TYPE_JSON).Put()
 }
 
 // Send a Request with PATCH method
-func Patch(url string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Body(body).Patch()
+func Patch(url string, body io.Reader, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Body(body).Patch()
 }
 
 // Send a Request with DELETE method
-func Delete(url string, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Delete()
+func Delete(url string, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Delete()
 }
 
 // Send a Request with OPTIONS method
-func Options(url string, headers map[string]string) (*http.Response, error) {
-	return NewClient().Url(url).Headers(headers).Options()
+func Options(url string, httpHeader header.GHttpHeader) (*http.Response, error) {
+	return NewClient().Url(url).Headers(httpHeader).Options()
 }
 
 // ReadBodyClose fetches the response Body, then close the Body
@@ -98,7 +96,7 @@ func ReadBodyClose(response *http.Response) ([]byte, error) {
 // ReadJsonClose fetches the response Body and try to decode as a json, then close the Body
 func ReadJsonClose(response *http.Response, v interface{}) error {
 	contentType := response.Header.Get("Content-Type")
-	if contentType != "application/json" {
+	if contentType != header.CONTENT_TYPE_JSON {
 		return errors.New(fmt.Sprintf("content type application/json expected, but %s got", contentType))
 	}
 	body, err := ReadBodyClose(response)
