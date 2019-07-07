@@ -34,3 +34,5 @@ response, err := ghttpclient.NewClient().
     Headers(headers).
     Get()
 ```
+
+API Reference: [https://godoc.org/github.com/panwenbin/ghttpclient](https://godoc.org/github.com/panwenbin/ghttpclient)
