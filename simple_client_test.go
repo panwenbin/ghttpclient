@@ -98,9 +98,11 @@ func TestPutJson(t *testing.T) {
 		t.Error("network error")
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
-	if bytes.Compare(jsonBytes, body) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", body)
+	var bodyJson TestJson
+	_ = ghttpclient.ReadJsonClose(response, &bodyJson)
+	bodyJsonBytes, _ := json.Marshal(bodyJson)
+	if bytes.Compare(jsonBytes, bodyJsonBytes) != 0 {
+		t.Errorf("expect 'ghttpclient, got %s", bodyJsonBytes)
 	}
 }
 
