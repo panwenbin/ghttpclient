@@ -53,7 +53,7 @@ func TestPostJson(t *testing.T) {
 
 	bodyJsonBytes, err := ghttpclient.ReadBodyClose(response)
 	if bytes.Compare(jsonBytes, bodyJsonBytes) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", bodyJsonBytes)
+		t.Errorf("expect '%s', got %s", jsonBytes, bodyJsonBytes)
 	}
 }
 
@@ -102,7 +102,7 @@ func TestPutJson(t *testing.T) {
 	_ = ghttpclient.ReadJsonClose(response, &bodyJson)
 	bodyJsonBytes, _ := json.Marshal(bodyJson)
 	if bytes.Compare(jsonBytes, bodyJsonBytes) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", bodyJsonBytes)
+		t.Errorf("expect '%s', got %s", jsonBytes, bodyJsonBytes)
 	}
 }
 
