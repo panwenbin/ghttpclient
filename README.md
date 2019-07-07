@@ -21,17 +21,16 @@ func main() {
         log.Fatal(err)
     }
 
-    defer response.Body.Close()
-    body, err := ioutil.ReadAll(response.Body)
+    body, err := ghttpclient.ReadBodyClose(response)
     fmt.Printf("%s", body)
 }
 ```
 
 ```go
+headers := header.GHttpHeader{}
+headers.UserAgent("ghttpclient")
 response, err := ghttpclient.NewClient().
     Url("http://www.panwenbin.com/").
-    Headers(map[string]string{
-        "User-Agent": "ghttpclient",
-    }).
+    Headers(headers).
     Get()
 ```
