@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/panwenbin/ghttpclient"
+	"github.com/panwenbin/ghttpclient/header"
 	"net/url"
 	"strings"
 	"testing"
@@ -140,9 +141,9 @@ func TestOptions(t *testing.T) {
 }
 
 func TestGetWithHeader(t *testing.T) {
-	response, err := ghttpclient.Get("http://ua.fei.lv/", map[string]string{
-		"User-Agent": "ghttpclient",
-	})
+	headers := header.GHttpHeader{}
+	headers.UserAgent("ghttpclient")
+	response, err := ghttpclient.Get("http://ua.fei.lv/", headers)
 
 	if err != nil {
 		t.Error("network error")
