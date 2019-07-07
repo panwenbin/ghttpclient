@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/panwenbin/ghttpclient"
-	"io/ioutil"
 	"net/url"
 	"strings"
 	"testing"
@@ -19,8 +18,7 @@ func TestGet(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -32,8 +30,7 @@ func TestPost(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -53,10 +50,9 @@ func TestPostJson(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
-	if bytes.Compare(jsonBytes, body) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", body)
+	bodyJsonBytes, err := ghttpclient.ReadBodyClose(response)
+	if bytes.Compare(jsonBytes, bodyJsonBytes) != 0 {
+		t.Errorf("expect 'ghttpclient, got %s", bodyJsonBytes)
 	}
 }
 
@@ -69,8 +65,7 @@ func TestPostForm(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare(data.Encode(), string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -82,8 +77,7 @@ func TestPut(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -103,8 +97,7 @@ func TestPutJson(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if bytes.Compare(jsonBytes, body) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -116,8 +109,7 @@ func TestPatch(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -129,8 +121,7 @@ func TestDelete(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -142,15 +133,14 @@ func TestOptions(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
 }
 
 func TestGetWithHeader(t *testing.T) {
-	response, err := ghttpclient.Get("http://ua.fei.lv/", map[string]string {
+	response, err := ghttpclient.Get("http://ua.fei.lv/", map[string]string{
 		"User-Agent": "ghttpclient",
 	})
 
@@ -158,8 +148,7 @@ func TestGetWithHeader(t *testing.T) {
 		t.Error("network error")
 	}
 
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
