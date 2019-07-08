@@ -8,9 +8,11 @@ import (
 	"encoding/json"
 	"github.com/panwenbin/ghttpclient"
 	"github.com/panwenbin/ghttpclient/header"
+	"math/rand"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGet(t *testing.T) {
@@ -154,5 +156,24 @@ func TestGetWithHeader(t *testing.T) {
 	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
+	}
+}
+
+func TestGetWithGzip(t *testing.T) {
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	buffer := bytes.Buffer{}
+	for i := 0; i < 1024; i++ {
+		buffer.WriteRune(rune(r.Intn(26) + 65))
+	}
+	headers := header.GHttpHeader{}
+	headers.AcceptEncodingGzip()
+	response, err := ghttpclient.Post("http://cp.fei.lv/ghttpclient", bytes.NewReader(buffer.Bytes()), headers)
+	if err != nil {
+		t.Error("network error")
+	}
+
+	body, err := ghttpclient.ReadBodyClose(response)
+	if bytes.Compare(buffer.Bytes(), body) != 0 {
+		t.Errorf("expect '%s', got %s", buffer.Bytes(), body)
 	}
 }

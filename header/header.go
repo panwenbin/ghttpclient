@@ -25,6 +25,11 @@ func (h GHttpHeader) UserAgent(userAgent string) GHttpHeader {
 	return h.Set("User-Agent", userAgent)
 }
 
+// AcceptEncodingGzip sets the Accept-Encoding to gzip
+func (h GHttpHeader) AcceptEncodingGzip() GHttpHeader {
+	return h.Set("Accept-Encoding", "gzip")
+}
+
 // ToHttpHeader converts GHttpHeader to http.Header
 func (h GHttpHeader) ToHttpHeader() http.Header {
 	httpHeader := make(http.Header)
