@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"github.com/panwenbin/ghttpclient"
 	"github.com/panwenbin/ghttpclient/header"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 	"math/rand"
 	"net/url"
 	"strings"
@@ -175,5 +177,20 @@ func TestGetWithGzip(t *testing.T) {
 	body, err := ghttpclient.ReadBodyClose(response)
 	if bytes.Compare(buffer.Bytes(), body) != 0 {
 		t.Errorf("expect '%s', got %s", buffer.Bytes(), body)
+	}
+}
+
+func TestTryUTF8ReadBodyClose(t *testing.T) {
+	utf8Str := "简体中文"
+	gbkStr, _, _ := transform.String(simplifiedchinese.GBK.NewEncoder(), utf8Str)
+
+	response, err := ghttpclient.Post("http://cp.fei.lv/gbk", strings.NewReader(gbkStr), nil)
+	if err != nil {
+		t.Error("network error")
+	}
+
+	body, err := ghttpclient.TryUTF8ReadBodyClose(response)
+	if strings.Compare(utf8Str, string(body)) != 0 {
+		t.Errorf("expect '%s', got %s", utf8Str, body)
 	}
 }

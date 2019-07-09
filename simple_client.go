@@ -10,6 +10,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/panwenbin/ghttpclient/header"
+	"golang.org/x/net/html/charset"
+	"golang.org/x/text/transform"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -91,6 +93,26 @@ func ReadBodyClose(response *http.Response) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+// TryUTF8ReadBodyClose tries to transfer the body bytes to utf-8 bytes when the body bytes is not in utf-8 encoding
+func TryUTF8ReadBodyClose(response *http.Response) ([]byte, error) {
+	body, err := ReadBodyClose(response)
+	if err != nil {
+		return nil, err
+	}
+
+	e, name, _ := charset.DetermineEncoding(body, response.Header.Get("Content-Type"))
+	if name == "utf-8" {
+		return body, nil
+	}
+
+	utf8Body, _, err := transform.Bytes(e.NewDecoder(), body)
+	if err != nil {
+		return body, nil
+	}
+
+	return utf8Body, nil
 }
 
 // ReadJsonClose fetches the response Body and try to decode as a json, then close the Body
