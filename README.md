@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-    response, err := ghttpclient.Get("http://www.panwenbin.com/", nil)
+    response, err := ghttpclient.Get("http://www.panwenbin.com/", nil).Response()
     if err != nil {
         log.Fatal(err)
     }
@@ -27,12 +27,21 @@ func main() {
 ```
 
 ```go
+    body, err := ghttpclient.Get("http://www.panwenbin.com/", nil).ReadBodyClose()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("%s", body)
+```
+
+```go
 headers := header.GHttpHeader{}
 headers.UserAgent("ghttpclient")
 response, err := ghttpclient.NewClient().
     Url("http://www.panwenbin.com/").
     Headers(headers).
-    Get()
+    Get().Response()
 ```
 
 API Reference: [https://godoc.org/github.com/panwenbin/ghttpclient](https://godoc.org/github.com/panwenbin/ghttpclient)

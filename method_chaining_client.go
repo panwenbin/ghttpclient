@@ -22,6 +22,8 @@ type GHttpClient struct {
 	header        header.GHttpHeader
 	body          io.Reader
 	timeout       time.Duration
+	response      *http.Response
+	err           error
 }
 
 // NewClient Returns a new GHttpClient
@@ -111,80 +113,107 @@ func (g *GHttpClient) prepare(method string) error {
 }
 
 // send do send the request
-func (g *GHttpClient) send() (*http.Response, error) {
-	response, err := g.client.Do(g.request)
-	if err != nil {
-		return nil, err
-	}
+func (g *GHttpClient) send() *GHttpClient {
+	g.response, g.err = g.client.Do(g.request)
 
-	return response, nil
+	return g
 }
 
 // Head sends the Request with HEAD method
-func (g *GHttpClient) Head() (*http.Response, error) {
-	err := g.prepare("HEAD")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Head() *GHttpClient {
+	g.err = g.prepare("HEAD")
+	if g.err != nil {
+		return g
 	}
 
 	return g.send()
 }
 
 // Get sends the Request with GET method
-func (g *GHttpClient) Get() (*http.Response, error) {
-	err := g.prepare("GET")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Get() *GHttpClient {
+	g.err = g.prepare("GET")
+	if g.err != nil {
+		return g
 	}
 
 	return g.send()
 }
 
 // Post sends the Request with POST method
-func (g *GHttpClient) Post() (*http.Response, error) {
-	err := g.prepare("POST")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Post() *GHttpClient {
+	g.err = g.prepare("POST")
+	if g.err != nil {
+		return g
 	}
 
 	return g.send()
 }
 
 // Put sends the Request with PUT method
-func (g *GHttpClient) Put() (*http.Response, error) {
-	err := g.prepare("PUT")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Put() *GHttpClient {
+	g.err = g.prepare("PUT")
+	if g.err != nil {
+		return g
 	}
 
 	return g.send()
 }
 
 // Patch sends the Request with PATCH method
-func (g *GHttpClient) Patch() (*http.Response, error) {
-	err := g.prepare("PATCH")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Patch() *GHttpClient {
+	g.err = g.prepare("PATCH")
+	if g.err != nil {
+		return g
 	}
 
 	return g.send()
 }
 
 // Delete sends the Request with DELETE method
-func (g *GHttpClient) Delete() (*http.Response, error) {
-	err := g.prepare("DELETE")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Delete() *GHttpClient {
+	g.err = g.prepare("DELETE")
+	if g.err != nil {
+		return g
 	}
 	return g.send()
 }
 
 // Options sends the Request with OPTIONS method
-func (g *GHttpClient) Options() (*http.Response, error) {
-	err := g.prepare("OPTIONS")
-	if err != nil {
-		return nil, err
+func (g *GHttpClient) Options() *GHttpClient {
+	g.err = g.prepare("OPTIONS")
+	if g.err != nil {
+		return g
 	}
 
 	return g.send()
+}
+
+// Response returns http.Response and error
+func (g *GHttpClient) Response() (*http.Response, error) {
+	return g.response, g.err
+}
+
+// ReadBodyClose fetches the response Body, then close the Body
+// supports gzip content-type
+func (g *GHttpClient) ReadBodyClose() ([]byte, error) {
+	if g.err != nil {
+		return []byte{}, g.err
+	}
+	return ReadBodyClose(g.response)
+}
+
+// TryUTF8ReadBodyClose tries to transfer the body bytes to utf-8 bytes when the body bytes is not in utf-8 encoding
+func (g *GHttpClient) TryUTF8ReadBodyClose() ([]byte, error) {
+	if g.err != nil {
+		return []byte{}, g.err
+	}
+	return TryUTF8ReadBodyClose(g.response)
+}
+
+// ReadJsonClose fetches the response Body and try to decode as a json, then close the Body
+func (g *GHttpClient) ReadJsonClose(v interface{}) error {
+	if g.err != nil {
+		return g.err
+	}
+	return ReadJsonClose(g.response, v)
 }

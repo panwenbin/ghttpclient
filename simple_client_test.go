@@ -18,26 +18,26 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	response, err := ghttpclient.Get("http://cp.fei.lv/ghttpclient", nil)
+	body, err := ghttpclient.Get("http://cp.fei.lv/ghttpclient", nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", body)
+		t.Fatalf("expect 'ghttpclient, got %s", body)
 	}
 }
 
 func TestPost(t *testing.T) {
-	response, err := ghttpclient.Post("http://cp.fei.lv/", strings.NewReader("ghttpclient"), nil)
+	body, err := ghttpclient.Post("http://cp.fei.lv/", strings.NewReader("ghttpclient"), nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", body)
+		t.Fatalf("expect 'ghttpclient, got %s", body)
 	}
 }
 
@@ -50,12 +50,12 @@ func TestPostJson(t *testing.T) {
 	}
 	jsonBytes, _ := json.Marshal(testJson)
 
-	response, err := ghttpclient.PostJson("http://cp.fei.lv/", jsonBytes, nil)
+	bodyJsonBytes, err := ghttpclient.PostJson("http://cp.fei.lv/", jsonBytes, nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	bodyJsonBytes, err := ghttpclient.ReadBodyClose(response)
 	if bytes.Compare(jsonBytes, bodyJsonBytes) != 0 {
 		t.Errorf("expect '%s', got %s", jsonBytes, bodyJsonBytes)
 	}
@@ -65,24 +65,24 @@ func TestPostForm(t *testing.T) {
 	data := url.Values{}
 	data.Add("msg", "ghttpclient")
 
-	response, err := ghttpclient.PostForm("http://cp.fei.lv/", data, nil)
+	body, err := ghttpclient.PostForm("http://cp.fei.lv/", data, nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare(data.Encode(), string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
 }
 
 func TestPut(t *testing.T) {
-	response, err := ghttpclient.Put("http://cp.fei.lv/put", strings.NewReader("ghttpclient"), nil)
+	body, err := ghttpclient.Put("http://cp.fei.lv/put", strings.NewReader("ghttpclient"), nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -97,13 +97,13 @@ func TestPutJson(t *testing.T) {
 	}
 	jsonBytes, _ := json.Marshal(testJson)
 
-	response, err := ghttpclient.PutJson("http://cp.fei.lv/ghttpclient", jsonBytes, nil)
+	var bodyJson TestJson
+	err := ghttpclient.PutJson("http://cp.fei.lv/ghttpclient", jsonBytes, nil).ReadJsonClose(&bodyJson)
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	var bodyJson TestJson
-	_ = ghttpclient.ReadJsonClose(response, &bodyJson)
 	bodyJsonBytes, _ := json.Marshal(bodyJson)
 	if bytes.Compare(jsonBytes, bodyJsonBytes) != 0 {
 		t.Errorf("expect '%s', got %s", jsonBytes, bodyJsonBytes)
@@ -111,36 +111,36 @@ func TestPutJson(t *testing.T) {
 }
 
 func TestPatch(t *testing.T) {
-	response, err := ghttpclient.Patch("http://cp.fei.lv/patch", strings.NewReader("ghttpclient"), nil)
+	body, err := ghttpclient.Patch("http://cp.fei.lv/patch", strings.NewReader("ghttpclient"), nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
 }
 
 func TestDelete(t *testing.T) {
-	response, err := ghttpclient.Delete("http://cp.fei.lv/ghttpclient", nil)
+	body, err := ghttpclient.Delete("http://cp.fei.lv/ghttpclient", nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
 }
 
 func TestOptions(t *testing.T) {
-	response, err := ghttpclient.Options("http://cp.fei.lv/ghttpclient", nil)
+	body, err := ghttpclient.Options("http://cp.fei.lv/ghttpclient", nil).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
 		t.Errorf("expect 'ghttpclient, got %s", body)
 	}
@@ -149,15 +149,15 @@ func TestOptions(t *testing.T) {
 func TestGetWithHeader(t *testing.T) {
 	headers := header.GHttpHeader{}
 	headers.UserAgent("ghttpclient")
-	response, err := ghttpclient.Get("http://ua.fei.lv/", headers)
+	body, err := ghttpclient.Get("http://ua.fei.lv/", headers).ReadBodyClose()
 
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if strings.Compare("ghttpclient", string(body)) != 0 {
-		t.Errorf("expect 'ghttpclient, got %s", body)
+		t.Fatalf("expect 'ghttpclient, got %s", body)
 	}
 }
 
@@ -169,14 +169,14 @@ func TestGetWithGzip(t *testing.T) {
 	}
 	headers := header.GHttpHeader{}
 	headers.AcceptEncodingGzip()
-	response, err := ghttpclient.Post("http://cp.fei.lv/ghttpclient", bytes.NewReader(buffer.Bytes()), headers)
+	body, err := ghttpclient.Post("http://cp.fei.lv/ghttpclient", bytes.NewReader(buffer.Bytes()), headers).ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.ReadBodyClose(response)
 	if bytes.Compare(buffer.Bytes(), body) != 0 {
-		t.Errorf("expect '%s', got %s", buffer.Bytes(), body)
+		t.Fatalf("expect '%s', got %s", buffer.Bytes(), body)
 	}
 }
 
@@ -184,13 +184,13 @@ func TestTryUTF8ReadBodyClose(t *testing.T) {
 	utf8Str := "简体中文"
 	gbkStr, _, _ := transform.String(simplifiedchinese.GBK.NewEncoder(), utf8Str)
 
-	response, err := ghttpclient.Post("http://cp.fei.lv/gbk", strings.NewReader(gbkStr), nil)
+	body, err := ghttpclient.Post("http://cp.fei.lv/gbk", strings.NewReader(gbkStr), nil).TryUTF8ReadBodyClose()
 	if err != nil {
-		t.Error("network error")
+		t.Error("error occurs")
+		t.Fatal(err)
 	}
 
-	body, err := ghttpclient.TryUTF8ReadBodyClose(response)
 	if strings.Compare(utf8Str, string(body)) != 0 {
-		t.Errorf("expect '%s', got %s", utf8Str, body)
+		t.Fatalf("expect '%s', got %s", utf8Str, body)
 	}
 }
