@@ -19,52 +19,54 @@ import (
 	"strings"
 )
 
+var Debug bool
+
 // Send a Request with GET method
 func Get(url string, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Get()
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Get()
 }
 
 // Send a Request with POST method
 func Post(url string, body io.Reader, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Body(body).Post()
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).Post()
 }
 
 // Send a Request as a json with POST Method
 func PostJson(url string, jsonBytes []byte, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
 		ContentType(header.CONTENT_TYPE_JSON).Post()
 }
 
 // Send a Request as a form with POST method
 func PostForm(url string, data url.Values, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Body(strings.NewReader(data.Encode())).
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(strings.NewReader(data.Encode())).
 		ContentType(header.CONTENT_TYPE_FORM_URLENCODED).Post()
 }
 
 // Send a Request with PUT method
 func Put(url string, body io.Reader, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Body(body).Put()
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).Put()
 }
 
 // Send a Request as a json with PUT method
 func PutJson(url string, jsonBytes []byte, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
 		ContentType(header.CONTENT_TYPE_JSON).Put()
 }
 
 // Send a Request with PATCH method
 func Patch(url string, body io.Reader, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Body(body).Patch()
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).Patch()
 }
 
 // Send a Request with DELETE method
 func Delete(url string, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Delete()
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Delete()
 }
 
 // Send a Request with OPTIONS method
 func Options(url string, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Url(url).Headers(httpHeader).Options()
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Options()
 }
 
 // ReadBodyClose fetches the response Body, then close the Body

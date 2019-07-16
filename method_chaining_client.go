@@ -6,9 +6,12 @@ package ghttpclient
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"github.com/panwenbin/ghttpclient/header"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -24,13 +27,35 @@ type GHttpClient struct {
 	timeout       time.Duration
 	response      *http.Response
 	err           error
+	debug         bool
+	startTime     time.Time
+	logger        *log.Logger
 }
 
 // NewClient Returns a new GHttpClient
 func NewClient() *GHttpClient {
 	return &GHttpClient{
 		header: make(header.GHttpHeader),
+		logger: log.New(os.Stdout, "ghttpclient", log.Ldate|log.Ltime|log.Lmicroseconds),
 	}
+}
+
+// DebugOn sets debug to true
+func (g *GHttpClient) DebugOn() *GHttpClient {
+	g.debug = true
+	return g
+}
+
+// Debug sets debug to the value of param 
+func (g *GHttpClient) Debug(debug bool) *GHttpClient {
+	g.debug = debug
+	return g
+}
+
+func (g *GHttpClient) LogDebug(flag string) {
+	now := time.Now()
+	str := fmt.Sprintf("%s [%s:%3.3f] %s\r\n", now.Format("2006-01-02 15:04:05.000"), flag, now.Sub(g.startTime).Seconds(), g.request.URL)
+	g.logger.Writer().Write([]byte(str))
 }
 
 // Url sets the url to request to
@@ -114,7 +139,14 @@ func (g *GHttpClient) prepare(method string) error {
 
 // send do send the request
 func (g *GHttpClient) send() *GHttpClient {
+	if g.debug {
+		g.startTime = time.Now()
+		g.LogDebug("S")
+	}
 	g.response, g.err = g.client.Do(g.request)
+	if g.debug {
+		g.LogDebug("R")
+	}
 
 	return g
 }
@@ -196,6 +228,9 @@ func (g *GHttpClient) Response() (*http.Response, error) {
 // ReadBodyClose fetches the response Body, then close the Body
 // supports gzip content-type
 func (g *GHttpClient) ReadBodyClose() ([]byte, error) {
+	if g.debug {
+		defer g.LogDebug("E")
+	}
 	if g.err != nil {
 		return []byte{}, g.err
 	}
@@ -204,6 +239,9 @@ func (g *GHttpClient) ReadBodyClose() ([]byte, error) {
 
 // TryUTF8ReadBodyClose tries to transfer the body bytes to utf-8 bytes when the body bytes is not in utf-8 encoding
 func (g *GHttpClient) TryUTF8ReadBodyClose() ([]byte, error) {
+	if g.debug {
+		defer g.LogDebug("E")
+	}
 	if g.err != nil {
 		return []byte{}, g.err
 	}
@@ -212,6 +250,9 @@ func (g *GHttpClient) TryUTF8ReadBodyClose() ([]byte, error) {
 
 // ReadJsonClose fetches the response Body and try to decode as a json, then close the Body
 func (g *GHttpClient) ReadJsonClose(v interface{}) error {
+	if g.debug {
+		defer g.LogDebug("E")
+	}
 	if g.err != nil {
 		return g.err
 	}
