@@ -55,7 +55,17 @@ func (g *GHttpClient) Debug(debug bool) *GHttpClient {
 
 func (g *GHttpClient) LogDebug(flag string) {
 	now := time.Now()
-	str := fmt.Sprintf("%s [%s:%3.3f] %s\r\n", now.Format("2006-01-02 15:04:05.000"), flag, now.Sub(g.startTime).Seconds(), g.request.URL)
+	statusCode := 0
+	if g.response != nil {
+		statusCode = g.response.StatusCode
+	}
+	str := fmt.Sprintf("[GHTTP] %s [%3d][%3s][%s:%3.3f] %s\r\n",
+		now.Format("2006-01-02 15:04:05.000"),
+		statusCode,
+		g.request.Method,
+		flag,
+		now.Sub(g.startTime).Seconds(),
+		g.request.URL)
 	g.logger.Writer().Write([]byte(str))
 }
 
