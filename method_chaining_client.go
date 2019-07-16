@@ -37,6 +37,7 @@ func NewClient() *GHttpClient {
 	return &GHttpClient{
 		header: make(header.GHttpHeader),
 		logger: log.New(os.Stdout, "ghttpclient", log.Ldate|log.Ltime|log.Lmicroseconds),
+		debug:  Debug,
 	}
 }
 
@@ -46,7 +47,7 @@ func (g *GHttpClient) DebugOn() *GHttpClient {
 	return g
 }
 
-// Debug sets debug to the value of param 
+// Debug sets debug to the value of param
 func (g *GHttpClient) Debug(debug bool) *GHttpClient {
 	g.debug = debug
 	return g

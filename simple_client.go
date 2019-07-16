@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -133,4 +134,12 @@ func ReadJsonClose(response *http.Response, v interface{}) error {
 	}
 
 	return nil
+}
+
+// init inits Debug on/off
+func init() {
+	debug := os.Getenv("DEBUG")
+	if debug != "" {
+		Debug = true
+	}
 }
