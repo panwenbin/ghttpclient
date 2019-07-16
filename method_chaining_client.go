@@ -15,6 +15,14 @@ import (
 	"time"
 )
 
+var (
+	green  = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
+	white  = string([]byte{27, 91, 57, 48, 59, 52, 55, 109})
+	yellow = string([]byte{27, 91, 57, 48, 59, 52, 51, 109})
+	red    = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
+	reset  = string([]byte{27, 91, 48, 109})
+)
+
 // GHttpClient is a Method chaining HTTP Client which is based on net/http.Client
 // NewClient => set attributes of a request => do the request with an action(Get, Post...)
 type GHttpClient struct {
@@ -55,18 +63,40 @@ func (g *GHttpClient) Debug(debug bool) *GHttpClient {
 
 func (g *GHttpClient) LogDebug(flag string) {
 	now := time.Now()
-	statusCode := 0
-	if g.response != nil {
-		statusCode = g.response.StatusCode
+	var content string
+	if flag == "S" {
+		content = ""
+	} else {
+		statusCode := 0
+		if g.response != nil {
+			statusCode = g.response.StatusCode
+		}
+		content = fmt.Sprintf(" %s[%d]%s %3.3fs", statusCodeColor(statusCode), statusCode, reset, now.Sub(g.startTime).Seconds())
 	}
-	str := fmt.Sprintf("[GHTTP] %s [%3d][%3s][%s:%3.3f] %s\r\n",
+
+	str := fmt.Sprintf("[GHTTP] %s [%3s] [%s]%s %s\r\n",
 		now.Format("2006-01-02 15:04:05.000"),
-		statusCode,
 		g.request.Method,
 		flag,
-		now.Sub(g.startTime).Seconds(),
+		content,
 		g.request.URL)
 	g.logger.Writer().Write([]byte(str))
+}
+
+// statusCodeColor returns a color for displaying in terminal.
+func statusCodeColor(code int) string {
+	switch {
+	case code < http.StatusContinue:
+		return red
+	case code >= http.StatusContinue && code < http.StatusMultipleChoices:
+		return green
+	case code >= http.StatusMultipleChoices && code < http.StatusBadRequest:
+		return white
+	case code >= http.StatusBadRequest && code < http.StatusInternalServerError:
+		return yellow
+	default:
+		return red
+	}
 }
 
 // Url sets the url to request to
