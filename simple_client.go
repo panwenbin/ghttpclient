@@ -139,7 +139,7 @@ func ReadJsonClose(response *http.Response, v interface{}) error {
 // init inits Debug on/off
 func init() {
 	debug := os.Getenv("DEBUG")
-	if debug != "" {
+	if debug != "" && debug != "false" && debug != "0" {
 		Debug = true
 	}
 }
