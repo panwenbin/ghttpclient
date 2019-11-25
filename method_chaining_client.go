@@ -32,6 +32,7 @@ type GHttpClient struct {
 	sslSkipVerify bool
 	header        header.GHttpHeader
 	body          io.Reader
+	cookieJar     http.CookieJar
 	timeout       time.Duration
 	response      *http.Response
 	err           error
@@ -137,6 +138,12 @@ func (g *GHttpClient) Body(body io.Reader) *GHttpClient {
 	return g
 }
 
+// CookieJar sets the cookie jar of the request
+func (g *GHttpClient) CookieJar(cookieJar http.CookieJar) *GHttpClient {
+	g.cookieJar = cookieJar
+	return g
+}
+
 // SslSkipVerify sets whether or not skipping ssl verify
 func (g *GHttpClient) SslSkipVerify(skip bool) *GHttpClient {
 	g.sslSkipVerify = skip
@@ -164,6 +171,10 @@ func (g *GHttpClient) prepare(method string) error {
 	g.request = request
 
 	g.client = &http.Client{}
+
+	if g.cookieJar != nil {
+		g.client.Jar = g.cookieJar
+	}
 
 	if g.timeout > 0 {
 		g.client.Timeout = g.timeout
