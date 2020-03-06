@@ -31,6 +31,7 @@ type GHttpClient struct {
 	client        *http.Client
 	url           string
 	sslSkipVerify bool
+	noRedirect    bool
 	header        header.GHttpHeader
 	body          io.Reader
 	cookieJar     http.CookieJar
@@ -151,6 +152,12 @@ func (g *GHttpClient) SslSkipVerify(skip bool) *GHttpClient {
 	return g
 }
 
+// NoRedirect sets whether or not to stop following redirects
+func (g *GHttpClient) NoRedirect(noFollow bool) *GHttpClient {
+	g.noRedirect = noFollow
+	return g
+}
+
 // Timeout sets a timeout to the http client
 func (g *GHttpClient) Timeout(timeout time.Duration) *GHttpClient {
 	g.timeout = timeout
@@ -196,6 +203,12 @@ func (g *GHttpClient) prepare(method string) error {
 
 	if g.sslSkipVerify {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	if g.noRedirect {
+		g.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
 	}
 
 	g.client.Transport = transport
