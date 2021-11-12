@@ -15,6 +15,12 @@ func (h GHttpHeader) Set(key, value string) GHttpHeader {
 	return h
 }
 
+// Del deletes a header by key
+func (h GHttpHeader) Del(key string) GHttpHeader {
+	delete(h, key)
+	return h
+}
+
 // ContentType sets the Content-Type header
 func (h GHttpHeader) ContentType(contentType string) GHttpHeader {
 	return h.Set("Content-Type", contentType)
@@ -28,6 +34,22 @@ func (h GHttpHeader) UserAgent(userAgent string) GHttpHeader {
 // AcceptEncodingGzip sets the Accept-Encoding to gzip
 func (h GHttpHeader) AcceptEncodingGzip() GHttpHeader {
 	return h.Set("Accept-Encoding", "gzip")
+}
+
+// ContentEncodingZip sets the Content-Encoding to gzip
+func (h GHttpHeader) ContentEncodingZip() GHttpHeader {
+	return h.Set("Content-Encoding", "gzip")
+}
+
+// RemoveContentEncoding deletes the Content-Encoding
+func (h GHttpHeader) RemoveContentEncoding() GHttpHeader {
+	return h.Del("Content-Encoding")
+}
+
+// IsContentEncodingZip checks if Content-Encoding is gzip
+func (h GHttpHeader) IsContentEncodingZip() bool {
+	v, _ := h["Content-Encoding"]
+	return v == "gzip"
 }
 
 // ToHttpHeader converts GHttpHeader to http.Header

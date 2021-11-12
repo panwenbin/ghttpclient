@@ -14,6 +14,7 @@ import (
 	"golang.org/x/text/transform"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,51 +23,93 @@ import (
 
 var Debug bool
 
+// GzipBody encodes the body with gzip
+func GzipBody(body io.Reader) *bytes.Buffer{
+	buf := &bytes.Buffer{}
+	gz, _ := gzip.NewWriterLevel(buf, gzip.DefaultCompression)
+	content, _ := ioutil.ReadAll(body)
+	if _, err := gz.Write(content); err != nil {
+		gz.Close()
+		log.Println(err)
+		return nil
+	}
+	gz.Close()
+
+	return buf
+}
+
 // Send a Request with GET method
 func Get(url string, httpHeader header.GHttpHeader) *GHttpClient {
+	httpHeader = httpHeader.RemoveContentEncoding()
 	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Get()
 }
 
 // Send a Request with POST method
 func Post(url string, body io.Reader, httpHeader header.GHttpHeader) *GHttpClient {
+	if httpHeader.IsContentEncodingZip() {
+		body = GzipBody(body)
+	}
 	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).Post()
 }
 
 // Send a Request as a json with POST Method
 func PostJson(url string, jsonBytes []byte, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
+	var body io.Reader
+	body = bytes.NewReader(jsonBytes)
+	if httpHeader.IsContentEncodingZip() {
+		body = GzipBody(body)
+	}
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).
 		ContentType(header.CONTENT_TYPE_JSON).Post()
 }
 
 // Send a Request as a form with POST method
 func PostForm(url string, data url.Values, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(strings.NewReader(data.Encode())).
+	var body io.Reader
+	body = strings.NewReader(data.Encode())
+	if httpHeader.IsContentEncodingZip() {
+		body = GzipBody(body)
+	}
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).
 		ContentType(header.CONTENT_TYPE_FORM_URLENCODED).Post()
 }
 
 // Send a Request with PUT method
 func Put(url string, body io.Reader, httpHeader header.GHttpHeader) *GHttpClient {
+	if httpHeader.IsContentEncodingZip() {
+		body = GzipBody(body)
+	}
 	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).Put()
 }
 
 // Send a Request as a json with PUT method
 func PutJson(url string, jsonBytes []byte, httpHeader header.GHttpHeader) *GHttpClient {
-	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(bytes.NewReader(jsonBytes)).
+	var body io.Reader
+	body = bytes.NewReader(jsonBytes)
+	if httpHeader.IsContentEncodingZip() {
+		body = GzipBody(body)
+	}
+	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).
 		ContentType(header.CONTENT_TYPE_JSON).Put()
 }
 
 // Send a Request with PATCH method
 func Patch(url string, body io.Reader, httpHeader header.GHttpHeader) *GHttpClient {
+	if httpHeader.IsContentEncodingZip() {
+		body = GzipBody(body)
+	}
 	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Body(body).Patch()
 }
 
 // Send a Request with DELETE method
 func Delete(url string, httpHeader header.GHttpHeader) *GHttpClient {
+	httpHeader = httpHeader.RemoveContentEncoding()
 	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Delete()
 }
 
 // Send a Request with OPTIONS method
 func Options(url string, httpHeader header.GHttpHeader) *GHttpClient {
+	httpHeader = httpHeader.RemoveContentEncoding()
 	return NewClient().Debug(Debug).Url(url).Headers(httpHeader).Options()
 }
 
