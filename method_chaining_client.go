@@ -4,13 +4,13 @@
 package ghttpclient
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/panwenbin/ghttpclient/header"
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"time"
@@ -23,6 +23,13 @@ var (
 	red    = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
 	reset  = string([]byte{27, 91, 48, 109})
 )
+
+var Transport = http.DefaultTransport.(*http.Transport).Clone()
+
+// SslSkipVerify sets whether or not skipping ssl verify
+func SslSkipVerify() {
+	Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+}
 
 // GHttpClient is a Method chaining HTTP Client which is based on net/http.Client
 // NewClient => set attributes of a request => do the request with an action(Get, Post...)
@@ -147,8 +154,11 @@ func (g *GHttpClient) CookieJar(cookieJar http.CookieJar) *GHttpClient {
 }
 
 // SslSkipVerify sets whether or not skipping ssl verify
+// Deprecated: use package SslSkipVerify instead
 func (g *GHttpClient) SslSkipVerify(skip bool) *GHttpClient {
-	g.sslSkipVerify = skip
+	if skip {
+		SslSkipVerify()
+	}
 	return g
 }
 
@@ -165,12 +175,12 @@ func (g *GHttpClient) Timeout(timeout time.Duration) *GHttpClient {
 }
 
 // prepare checks whether attributes are set, and build a http client
-func (g *GHttpClient) prepare(method string) error {
+func (g *GHttpClient) prepare(method string, ctx context.Context) error {
 	if g.url == "" {
 		return errors.New("URL must be set before sending a request")
 	}
 
-	request, err := http.NewRequest(method, g.url, g.body)
+	request, err := http.NewRequestWithContext(ctx, method, g.url, g.body)
 	if err != nil {
 		return err
 	}
@@ -180,19 +190,6 @@ func (g *GHttpClient) prepare(method string) error {
 
 	g.client = &http.Client{}
 
-	transport := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
 	if g.cookieJar != nil {
 		g.client.Jar = g.cookieJar
 	}
@@ -201,17 +198,13 @@ func (g *GHttpClient) prepare(method string) error {
 		g.client.Timeout = g.timeout
 	}
 
-	if g.sslSkipVerify {
-		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
 	if g.noRedirect {
 		g.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}
 	}
 
-	g.client.Transport = transport
+	g.client.Transport = Transport
 
 	return nil
 }
@@ -232,7 +225,17 @@ func (g *GHttpClient) send() *GHttpClient {
 
 // Head sends the Request with HEAD method
 func (g *GHttpClient) Head() *GHttpClient {
-	g.err = g.prepare("HEAD")
+	g.err = g.prepare("HEAD", context.Background())
+	if g.err != nil {
+		return g
+	}
+
+	return g.send()
+}
+
+// HeadWithContext
+func (g *GHttpClient) HeadWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("HEAD", ctx)
 	if g.err != nil {
 		return g
 	}
@@ -242,7 +245,17 @@ func (g *GHttpClient) Head() *GHttpClient {
 
 // Get sends the Request with GET method
 func (g *GHttpClient) Get() *GHttpClient {
-	g.err = g.prepare("GET")
+	g.err = g.prepare("GET", context.Background())
+	if g.err != nil {
+		return g
+	}
+
+	return g.send()
+}
+
+// GetWithContext
+func (g *GHttpClient) GetWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("GET", ctx)
 	if g.err != nil {
 		return g
 	}
@@ -252,7 +265,17 @@ func (g *GHttpClient) Get() *GHttpClient {
 
 // Post sends the Request with POST method
 func (g *GHttpClient) Post() *GHttpClient {
-	g.err = g.prepare("POST")
+	g.err = g.prepare("POST", context.Background())
+	if g.err != nil {
+		return g
+	}
+
+	return g.send()
+}
+
+// PostWithContext
+func (g *GHttpClient) PostWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("POST", ctx)
 	if g.err != nil {
 		return g
 	}
@@ -262,7 +285,17 @@ func (g *GHttpClient) Post() *GHttpClient {
 
 // Put sends the Request with PUT method
 func (g *GHttpClient) Put() *GHttpClient {
-	g.err = g.prepare("PUT")
+	g.err = g.prepare("PUT", context.Background())
+	if g.err != nil {
+		return g
+	}
+
+	return g.send()
+}
+
+// PutWithContext
+func (g *GHttpClient) PutWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("PUT", ctx)
 	if g.err != nil {
 		return g
 	}
@@ -272,7 +305,17 @@ func (g *GHttpClient) Put() *GHttpClient {
 
 // Patch sends the Request with PATCH method
 func (g *GHttpClient) Patch() *GHttpClient {
-	g.err = g.prepare("PATCH")
+	g.err = g.prepare("PATCH", context.Background())
+	if g.err != nil {
+		return g
+	}
+
+	return g.send()
+}
+
+// Patch sends the Request with PATCH method
+func (g *GHttpClient) PatchWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("PATCH", ctx)
 	if g.err != nil {
 		return g
 	}
@@ -282,16 +325,36 @@ func (g *GHttpClient) Patch() *GHttpClient {
 
 // Delete sends the Request with DELETE method
 func (g *GHttpClient) Delete() *GHttpClient {
-	g.err = g.prepare("DELETE")
+	g.err = g.prepare("DELETE", context.Background())
 	if g.err != nil {
 		return g
 	}
 	return g.send()
 }
 
+// DeleteWithContext
+func (g *GHttpClient) DeleteWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("DELETE", ctx)
+	if g.err != nil {
+		return g
+	}
+	return g.send()
+}
+
+
 // Options sends the Request with OPTIONS method
 func (g *GHttpClient) Options() *GHttpClient {
-	g.err = g.prepare("OPTIONS")
+	g.err = g.prepare("OPTIONS", context.Background())
+	if g.err != nil {
+		return g
+	}
+
+	return g.send()
+}
+
+// OptionsWithContext
+func (g *GHttpClient) OptionsWithContext(ctx context.Context) *GHttpClient {
+	g.err = g.prepare("OPTIONS", ctx)
 	if g.err != nil {
 		return g
 	}
