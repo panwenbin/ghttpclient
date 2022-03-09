@@ -26,6 +26,12 @@ var (
 
 var Transport = http.DefaultTransport.(*http.Transport).Clone()
 
+func init() {
+	Transport.MaxIdleConns = 100
+	Transport.MaxConnsPerHost = 100
+	Transport.MaxIdleConnsPerHost = 100
+}
+
 // SslSkipVerify sets whether or not skipping ssl verify
 func SslSkipVerify() {
 	Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -340,7 +346,6 @@ func (g *GHttpClient) DeleteWithContext(ctx context.Context) *GHttpClient {
 	}
 	return g.send()
 }
-
 
 // Options sends the Request with OPTIONS method
 func (g *GHttpClient) Options() *GHttpClient {
