@@ -11,6 +11,7 @@ import (
 	"github.com/panwenbin/ghttpclient/header"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -24,12 +25,29 @@ var (
 	reset  = string([]byte{27, 91, 48, 109})
 )
 
-var Transport = http.DefaultTransport.(*http.Transport).Clone()
+// Transport is the default transport for ghttpclient
+var Transport *http.Transport
+
+// ResetTransport resets the Transport
+func ResetTransport() {
+	Transport = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		MaxConnsPerHost:       100,
+		MaxIdleConnsPerHost:   100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+}
 
 func init() {
-	Transport.MaxIdleConns = 100
-	Transport.MaxConnsPerHost = 100
-	Transport.MaxIdleConnsPerHost = 100
+	ResetTransport()
 }
 
 // SslSkipVerify sets whether or not skipping ssl verify
