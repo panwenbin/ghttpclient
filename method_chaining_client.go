@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
@@ -62,6 +63,7 @@ type GHttpClient struct {
 	client        *http.Client
 	url           string
 	sslSkipVerify bool
+	proxy         func(req *http.Request) (*url.URL, error)
 	noRedirect    bool
 	header        header.GHttpHeader
 	body          io.Reader
@@ -186,6 +188,12 @@ func (g *GHttpClient) SslSkipVerify(skip bool) *GHttpClient {
 	return g
 }
 
+// Proxy sets a proxyFunc
+func (g *GHttpClient) Proxy(proxyFunc func(req *http.Request) (*url.URL, error)) *GHttpClient {
+	g.proxy = proxyFunc
+	return g
+}
+
 // NoRedirect sets whether or not to stop following redirects
 func (g *GHttpClient) NoRedirect(noFollow bool) *GHttpClient {
 	g.noRedirect = noFollow
@@ -228,7 +236,13 @@ func (g *GHttpClient) prepare(method string, ctx context.Context) error {
 		}
 	}
 
-	g.client.Transport = Transport
+	if g.proxy != nil {
+		_transport := Transport.Clone()
+		_transport.Proxy = g.proxy
+		g.client.Transport = _transport
+	} else {
+		g.client.Transport = Transport
+	}
 
 	return nil
 }
